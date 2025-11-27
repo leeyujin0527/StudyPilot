@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
+import FlightButton from "@/src/shared/ui/flightButton";
 
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -15,7 +16,7 @@ export default function Map() {
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
       center: [127.0, 37.5],
-      zoom: 9,
+      zoom: 5.3,
     });
 
     map.on("load", () => {
@@ -35,6 +36,11 @@ export default function Map() {
     return () => map.remove();
   }, []);
 
-  return <div ref={mapContainer} className="w-full h-screen shadow-md" />;
+  return(
+    <div className="relative w-full h-screen shadow-md">
+    <div ref={mapContainer} className="w-full h-full" />
+    <FlightButton />
+  </div>
+  ) 
 }
 

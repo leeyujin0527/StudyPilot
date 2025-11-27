@@ -1,4 +1,3 @@
-import React from 'react'
 import Map from '@/src/feature/map/ui/Map';
 
 const MapPage = () => {

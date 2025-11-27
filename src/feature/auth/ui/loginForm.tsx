@@ -1,7 +1,7 @@
 "use client"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { useState } from "react"
-import { auth } from "@/src/firebase"
+import { auth } from "@/src/libs/firebase"
 import { useRouter } from "next/navigation"
 
 const LoginForm = () => {
