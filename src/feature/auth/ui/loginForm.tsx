@@ -19,14 +19,14 @@ const LoginForm = () => {
         }
     }
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-[#F6F5F2]">
-      <form onSubmit={handleLogin} className="w-full flex flex-col gap-5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+    <div className="w-full min-h-screen flex items-center justify-center bg-[#000000]">
+      <form onSubmit={handleLogin} className="flex flex-col w-full gap-5 sm:max-w-lg md:max-w-xl lg:max-w-2xl">
         <div className="flex flex-col gap-1">
           <input
             onChange={(e) => setEmail(e.target.value)}
             placeholder="이메일을 입력해주세요"
             type="email"
-            className="w-full h-13  bg-[#E9E7E1] px-2 sm:px-3  outline-none"
+            className="w-full h-13  bg-[#ffffff] px-2 sm:px-3  outline-none"
           ></input>
         </div>
         <div>
@@ -34,10 +34,10 @@ const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="비밀번호를 입력해주세요"
             type="password"
-            className="w-full h-13  bg-[#E9E7E1] px-2 sm:px-3 outline-none"
+            className="w-full h-13  bg-[#ffffff] px-2 sm:px-3 outline-none"
           ></input>
         </div>
-        <button type="submit" className="w-full h-13 mt-8 bg-[#7FE067] px-2 sm:px-3 outline-none text-white font-bold text-[20px]">로그인</button>
+        <button type="submit" className="w-full h-13 mt-8 bg-[#0089b3] px-2 sm:px-3 outline-none text-white font-bold text-[20px]">로그인</button>
       </form>
     </div>
   )

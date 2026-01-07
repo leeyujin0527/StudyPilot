@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import FlightButton from "@/src/shared/ui/flightButton";
+import { getGeoCoding } from "@/src/infrastructure/geo/geo";
+const ORIGIN: [number, number] = [127.0, 37.5];
 
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -14,24 +15,19 @@ export default function Map() {
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: [127.0, 37.5],
-      zoom: 5.3,
+      style: "mapbox://styles/yujineee/cmih7nyc9000q01sq8t7rcl39",
+      center: ORIGIN,
+      zoom: 7.3,
     });
 
-    map.on("load", () => {
-      const landLayers = ["land", "landcover", "landuse"];
-
-      landLayers.forEach((layer) => {
-        try {
-          if (map.getLayer(layer)) {
-            map.setPaintProperty(layer, "fill-color", "#ffe3ed"); // 핑크
-          }
-        } catch (err) {
-          console.warn(`레이어 수정 실패: ${layer}`, err);
-        }
-      });
-    });
+  (async () => {
+    const destination = await getGeoCoding("Busan");
+    
+    new mapboxgl.Marker({ color: "red", scale: 2.1 })
+      .setLngLat(ORIGIN)
+      .addTo(map);
+    
+  })();
 
     return () => map.remove();
   }, []);
@@ -39,7 +35,6 @@ export default function Map() {
   return(
     <div className="relative w-full h-screen shadow-md">
     <div ref={mapContainer} className="w-full h-full" />
-    <FlightButton />
   </div>
   ) 
 }
