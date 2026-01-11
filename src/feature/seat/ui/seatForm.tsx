@@ -4,7 +4,13 @@ import { useState } from 'react';
 type SeatStatus = 'available' | 'occupied';
 type SeatsMap = Record<string, SeatStatus>;
 
-const SeatForm = () => {
+interface Props {
+  onStart : () => void;
+  onSeatSelect : (seat: string) => void;
+  flightName : string;
+}
+
+const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
   const rows = 12;
   const seatsPerRow = 6;
   
@@ -21,16 +27,19 @@ const SeatForm = () => {
     return initialSeats;
   });
 
-  const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
+  const [selectedSeat, setSelectedSeat] = useState<string>("");
 
   const handleSeatClick = (seatId: string) => {
     if (seats[seatId] === 'occupied') return;
     
     if (selectedSeat === seatId) {
-      setSelectedSeat(null);
+      setSelectedSeat("");
     } else {
       setSelectedSeat(seatId);
     }
+    const nextSeat = selectedSeat === seatId ? "" : seatId;
+    onSeatSelect(nextSeat);
+    setSelectedSeat(nextSeat);
   };
 
   const getSeatColor = (seatId: string) => {
@@ -40,16 +49,16 @@ const SeatForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-8">
-      <div className="max-w-2xl w-full">
+    <div className="flex items-center justify-center min-h-screen p-8 bg-black">
+      <div className="w-full max-w-2xl">
         {/* 비행기 앞부분 */}
         <div className="flex justify-center mb-8">
-          <div className="w-64 h-16 bg-gradient-to-b from-gray-800 to-gray-700 rounded-t-full border-t-4 border-gray-600"></div>
+          <div className="w-64 h-16 border-t-4 border-gray-600 rounded-t-full bg-gradient-to-b from-gray-800 to-gray-700"></div>
         </div>
 
         {/* 좌석 배치 */}
-        <div className="bg-gray-900 rounded-3xl p-8 shadow-2xl">
-          <h2 className="text-white text-2xl font-bold text-center mb-6">좌석 선택</h2>
+        <div className="p-8 bg-gray-900 shadow-2xl rounded-3xl">
+          <h2 className="mb-6 text-2xl font-bold text-center text-white">좌석 선택</h2>
           
           {/* 좌석 범례 */}
           <div className="flex justify-center gap-6 mb-6 text-sm">
@@ -58,7 +67,7 @@ const SeatForm = () => {
               <span className="text-gray-300">선택 가능</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-emerald-500 rounded"></div>
+              <div className="w-6 h-6 rounded bg-emerald-500"></div>
               <span className="text-gray-300">선택됨</span>
             </div>
             <div className="flex items-center gap-2">
@@ -87,15 +96,15 @@ const SeatForm = () => {
                           } shadow-lg`}
                           title={seatId}
                         >
-                          <span className="text-white text-xs font-semibold">{seatId}</span>
+                          <span className="text-xs font-semibold text-white">{seatId}</span>
                         </button>
                       );
                     })}
                   </div>
 
                   {/* 통로 */}
-                  <div className="w-8 flex items-center justify-center">
-                    <span className="text-gray-600 font-bold">{rowNum}</span>
+                  <div className="flex items-center justify-center w-8">
+                    <span className="font-bold text-gray-600">{rowNum}</span>
                   </div>
 
                   {/* 오른쪽 좌석 (D, E, F) */}
@@ -112,7 +121,7 @@ const SeatForm = () => {
                           } shadow-lg`}
                           title={seatId}
                         >
-                          <span className="text-white text-xs font-semibold">{seatId}</span>
+                          <span className="text-xs font-semibold text-white">{seatId}</span>
                         </button>
                       );
                     })}
@@ -125,12 +134,12 @@ const SeatForm = () => {
           {/* 선택된 좌석 표시 */}
           {selectedSeat && (
             <div className="mt-8 text-center">
-              <p className="text-white text-lg">
+              <p className="text-lg text-white">
                 선택된 좌석: <span className="font-bold text-emerald-400">{selectedSeat}</span>
               </p>
               <button
-                onClick={() => alert(`${selectedSeat} 좌석이 예약되었습니다!`)}
-                className="mt-4 px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition-colors duration-200"
+                onClick={onStart}
+                className="px-8 py-3 mt-4 font-bold text-white transition-colors duration-200 rounded-lg bg-emerald-500 hover:bg-emerald-600"
               >
                 예약하기
               </button>
@@ -140,7 +149,7 @@ const SeatForm = () => {
 
         {/* 비행기 뒷부분 */}
         <div className="flex justify-center mt-8">
-          <div className="w-48 h-12 bg-liner-to-b from-gray-700 to-gray-800 rounded-b-full border-b-4 border-gray-600"></div>
+          <div className="w-48 h-12 border-b-4 border-gray-600 rounded-b-full bg-liner-to-b from-gray-700 to-gray-800"></div>
         </div>
       </div>
     </div>

@@ -21,11 +21,16 @@ export default function Map() {
     });
 
   (async () => {
-    const destination = await getGeoCoding("Busan");
+    const destination = await getGeoCoding("Fukuoka");
     
-    new mapboxgl.Marker({ color: "red", scale: 2.1 })
+   new mapboxgl.Marker({ color: "red", scale: 2.1 })
       .setLngLat(ORIGIN)
       .addTo(map);
+     
+
+    // new mapboxgl.Marker({ color: "red", scale: 2.1 })
+    //   .setLngLat(destination)
+    //   .addTo(map);
     
   })();
 

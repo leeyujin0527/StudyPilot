@@ -1,4 +1,4 @@
-import { DesType, DesResponse } from "./des-type";
+import { DesType, DesResponse } from "../type/des-type";
 import { http } from "@/src/shared/api/http";
 
 export const destination = async (DesType : DesType) : Promise<DesResponse> => {

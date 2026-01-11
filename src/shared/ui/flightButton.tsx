@@ -32,9 +32,10 @@ const FlightButton = ({ onOpen }: FlightButtonProps) => {
   if (loading || !user) return null;
 
   return (
-    <div className="absolute bottom-6 right-6">
+    <div className="fixed z-50 bottom-6 right-6">
       <button
-        className="bg-white text-[#209eff] px-4 py-2 rounded-xl shadow-md hover:bg-[#209eff] hover:text-white transition"
+        className="bg-white text-[#209eff] px-4 py-2 rounded-xl shadow-md
+                 hover:bg-[#209eff] hover:text-white transition"
         onClick={onOpen}
       >
         ✈️ 비행 시작하기

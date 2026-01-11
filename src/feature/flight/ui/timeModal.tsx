@@ -1,12 +1,25 @@
-import { DesResponse } from "./api/des-type";
+import { on } from "events";
+import { useState } from "react";
 
 interface Props {
     time : number;
     onChangeTime : (time : number) => void;
     onDesData : () => void;
+    onNext : () => void;
+    onSetFlightName: (name: string) => void;
 }
 
-const TimeModal = ({time, onChangeTime, onDesData} : Props) =>{
+const TimeModal = ({time, onChangeTime, onDesData, onNext, onSetFlightName} : Props) =>{
+    const [study, setStudy] = useState("");
+    const handleTrim = () => {
+        if (study.trim().length === 0){
+            alert("공부할 내용을 입력해주세요");
+            return;
+        }
+        onNext();
+        onDesData();
+        onSetFlightName(study);
+    }
   return (
     <div>
         {/* 비행명 */}
@@ -17,6 +30,8 @@ const TimeModal = ({time, onChangeTime, onDesData} : Props) =>{
           <textarea
             className="w-full h-20 p-3 bg-gray-800 rounded-lg outline-none resize-none"
             placeholder="예: 영어 단어 100개 외우기"
+            value={study}
+            onChange={(e) => setStudy(e.target.value)}
           />
         </div>
 
@@ -48,7 +63,7 @@ const TimeModal = ({time, onChangeTime, onDesData} : Props) =>{
         {/* 버튼 */}
         <button
           className="w-full py-3 rounded-xl bg-[#7FE067] text-black font-bold hover:opacity-90 transition"
-          onClick={onDesData}
+          onClick={handleTrim}
         >
           다음 페이지
         </button>
