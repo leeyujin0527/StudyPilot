@@ -3,6 +3,7 @@ import SeatForm from "@/src/feature/seat/ui/seatForm";
 import { sessionStart } from "@/src/feature/seat/api/session-start";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const seatPage = () => {
   const searchParams = useSearchParams();
@@ -13,9 +14,12 @@ const seatPage = () => {
   if (!destination || !flightName) {
     return null;
   }
+  const router = useRouter()
   const handleStart = async () => {
-    await sessionStart({ flightName, origin, destination, seat });
+    const res = await sessionStart({ flightName, origin, destination, seat });
+    router.push(`/flight?sessionId=${res.sessionId}&destination=${destination}`)
     console.log(`Session started with flightName: ${flightName}, origin: ${origin}, destination: ${destination}, seat: ${seat}`);
+    console.log(res)
   };
   return (
     <div>

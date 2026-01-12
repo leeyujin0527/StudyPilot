@@ -15,6 +15,7 @@ function FlightModal() {
 
   const handleDes = async () => {
     const res = await destination({ studyMinutes: time, origin: "Seoul" });
+    console.log()
     setRecommendData(res);
   };
   return (

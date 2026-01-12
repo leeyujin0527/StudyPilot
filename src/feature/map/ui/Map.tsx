@@ -3,10 +3,13 @@
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import { getGeoCoding } from "@/src/infrastructure/geo/geo";
+import { useSearchParams } from "next/navigation";
 const ORIGIN: [number, number] = [127.0, 37.5];
 
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
+  const SearchParams = useSearchParams()
+  const des = SearchParams.get("destination")
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -21,16 +24,16 @@ export default function Map() {
     });
 
   (async () => {
-    const destination = await getGeoCoding("Fukuoka");
+    const destination = await getGeoCoding(String(des));
     
-   new mapboxgl.Marker({ color: "red", scale: 2.1 })
+   new mapboxgl.Marker({ color: "blue", scale: 2.1 })
       .setLngLat(ORIGIN)
       .addTo(map);
      
 
-    // new mapboxgl.Marker({ color: "red", scale: 2.1 })
-    //   .setLngLat(destination)
-    //   .addTo(map);
+    new mapboxgl.Marker({ color: "red", scale: 2.1 })
+      .setLngLat(destination)
+      .addTo(map);
     
   })();
 

@@ -3,6 +3,7 @@ import Map from '@/src/feature/map/ui/Map';
 import FlightButton from '@/src/shared/ui/flightButton';
 import { useState } from 'react';
 import FlightModal from '@/src/feature/flight/ui/flightModal';
+import FlightDashboard from '@/src/feature/flight/ui/flightDashboard';
 
 const MapPage = () => {
   const [isModal, setIsModal] = useState(false);
@@ -13,6 +14,7 @@ const MapPage = () => {
       <FlightButton onOpen={() => setIsModal(true)}/>
       {isModal &&
         <FlightModal/>}
+      <FlightDashboard/>
     </div>
   )
 }
