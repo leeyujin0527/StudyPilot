@@ -4,6 +4,7 @@ import TimeModal from "./timeModal";
 import DestinationModal from "./destinationModal";
 import { destination } from "../api/desination";
 import { DesResponse } from "../type/des-type";
+import { useFlightStore } from "../model/flightStore";
 
 function FlightModal() {
   const [time, setTime] = useState(30);
@@ -35,10 +36,11 @@ function FlightModal() {
             time={time}
             onNext={() => {
               if (!selectedDes) return;
-              router.push( `/seat?destination=${selectedDes}&flightName=${encodeURIComponent(flightName)}`);
+              router.push( `/seat?destination=${selectedDes}&flightName=${flightName}`);
             }}
             recommendData={recommendData}
             onSelect={setSelectedDes}
+            flightName = {flightName}
           />
         )}
       </div>

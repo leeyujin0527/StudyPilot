@@ -1,14 +1,16 @@
 import { DesResponse, recommendations } from "../type/des-type";
 import { useState } from "react";
+import { useFlightStore } from "../model/flightStore";
 
 interface Props {
   time: number;
   onNext: () => void;
   recommendData: DesResponse | null;
   onSelect: (city: string) => void;
+  flightName : string
 }
 
-const DestinationModal = ({ time, onNext, recommendData, onSelect }: Props) => {
+const DestinationModal = ({ time, onNext, recommendData, onSelect, flightName }: Props) => {
   const [selected, setSelected] = useState<string | null>(null);
   const handleNext = () =>{
     if (!selected){
