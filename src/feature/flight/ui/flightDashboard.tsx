@@ -7,8 +7,8 @@ function FlightDashboard() {
     isFlying,
     flightName,
     destination,
-    startedAt,  // ← progressPercentage 대신!
-    estimatedMinutes,  // ← 이것도!
+    startedAt,
+    estimatedMinutes, 
     flightEnd,
   } = useFlightStore();
   
@@ -16,7 +16,7 @@ function FlightDashboard() {
 
 const handleEnd = () => {
     flightEnd();               
-    router.replace("/flight");
+    router.push("/flight");
   };
 
   const [progress, setProgress] = useState(0);
