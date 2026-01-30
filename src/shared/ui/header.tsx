@@ -37,6 +37,12 @@ const Header = () => {
       </div>
       <nav className="flex flex-row gap-20 font-medium text-gray-700">
         <div
+          onClick={() => router.push("/")}
+          className="cursor-pointer hover:text-[#7FE067] transition text-white"
+        >
+          홈
+        </div>
+        <div
           onClick={() => router.push("/flight")}
           className="cursor-pointer hover:text-[#7FE067] transition text-white"
         >
@@ -47,12 +53,6 @@ const Header = () => {
           className="cursor-pointer hover:text-[#7FE067] transition text-white"
         >
           기록
-        </div>
-        <div
-          onClick={() => router.push("/mypage")}
-          className="cursor-pointer hover:text-[#7FE067] transition text-white"
-        >
-          마이페이지
         </div>
       </nav>
      <div className="flex flex-row gap-2.5">

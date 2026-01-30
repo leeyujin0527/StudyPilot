@@ -1,6 +1,7 @@
 import { useFlightStore } from '../model/flightStore';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { stopFocusSound } from '@/src/libs/flightSound';
 
 function FlightDashboard() {
   const {
@@ -8,19 +9,35 @@ function FlightDashboard() {
     flightName,
     destination,
     startedAt,
+    sessionId,
+    showFinishedModal,
     estimatedMinutes, 
     flightEnd,
+    flightNotEnd,
   } = useFlightStore();
   
   const router = useRouter()
 
-const handleEnd = () => {
-    flightEnd();               
-    router.push("/flight");
+
+const handleEnd = async() => { 
+    flightEnd();
+    stopFocusSound()              
+  };
+  const handleNotEnd = async() => { 
+    flightNotEnd();
+    stopFocusSound()
+    router.push("/record");
   };
 
   const [progress, setProgress] = useState(0);
-
+  useEffect(() => {
+    const handleStop = () =>{
+      if (progress >= 100) {
+        handleEnd();
+      }
+    }
+    handleStop();
+  }, [progress, isFlying]);
   
 
   // 실시간 진행률 계산
@@ -52,6 +69,7 @@ const handleEnd = () => {
   if (!isFlying) return null;
 
   return (
+    
     <div className="fixed w-full max-w-5xl px-4 -translate-x-1/2 bottom-6 left-1/2">
       <div className="rounded-full shadow-2xl bg-slate-800">
         <div className="flex items-center gap-6 px-8 py-4">
@@ -104,7 +122,7 @@ const handleEnd = () => {
           {/* 버튼 */}
           <div className="flex-shrink-0">
             <button 
-              onClick={handleEnd}
+              onClick={handleNotEnd}
               className="flex items-center gap-3 px-8 py-3 transition-colors border-2 rounded-full bg-red-950/50 border-red-500/50 hover:bg-red-900/50"
             >
               <div className="flex items-center justify-center w-6 h-6 bg-red-500 rounded-sm">

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useFlightStore } from "@/src/feature/flight/model/flightStore";
 import { getSession } from "@/src/feature/flight/api/session-get";
+import { startFocusSound } from "@/src/libs/flightSound";
 
 const seatPage = () => {
   const searchParams = useSearchParams();
@@ -19,8 +20,9 @@ const seatPage = () => {
   const router = useRouter()
   const handleStart = async () => {
     const res = await sessionStart({ flightName, origin, destination, seat });
-    const session = await getSession(res.sessionId)
-    useFlightStore.getState().setSession(session)
+    const session = await getSession(res.sessionId);
+    useFlightStore.getState().setSession(session);
+    startFocusSound();
     router.push(`/flight?sessionId=${res.sessionId}`)
     console.log(`Session started with flightName: ${flightName}, origin: ${origin}, destination: ${destination}, seat: ${seat}`);
     console.log(res)

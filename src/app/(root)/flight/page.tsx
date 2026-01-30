@@ -8,11 +8,17 @@ import { useFlightStore } from '@/src/feature/flight/model/flightStore';
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { getSession } from '@/src/feature/flight/api/session-get';
+import FinisedModal from '@/src/feature/flight/ui/finisedModal';
 
 const MapPage = () => {
   const [isModal, setIsModal] = useState(false);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
+  const {showFinishedModal} = useFlightStore()
+  useEffect(() => {
+    useFlightStore.setState({ showFinishedModal: false });
+  }, []);
+  
 
   useEffect(() => {
     if (!sessionId) return;
@@ -33,6 +39,7 @@ const MapPage = () => {
       {isModal &&
         <FlightModal/>}
       <FlightDashboard/>
+      {showFinishedModal && <FinisedModal />}
     </div>
   )
 }

@@ -1,6 +1,6 @@
-// flightStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create, } from 'zustand';
+import { persist} from 'zustand/middleware';
+import { stopSession } from '../api/patch-session';
 
 interface FlightStore {
   isFlying: boolean;
@@ -9,20 +9,23 @@ interface FlightStore {
   startedAt: string | null;
   estimatedMinutes: number | null;
   sessionId: string | null;
+  showFinishedModal : boolean;
   
   setSession: (session: any) => void;
   flightEnd: () => void;
+  flightNotEnd: () => void;
 }
 
 export const useFlightStore = create<FlightStore>()(
-  persist(  // ← persist 추가!
-    (set) => ({
+  persist( 
+    (set,get) => ({
       isFlying: false,
       flightName: null,
       destination: null,
       startedAt: null,
       estimatedMinutes: null,
       sessionId: null,
+      showFinishedModal : false,
       
       setSession: (session) => set({
         isFlying: true,
@@ -32,18 +35,45 @@ export const useFlightStore = create<FlightStore>()(
         estimatedMinutes: session.estimatedMinutes,
         sessionId: session.sessionId,
       }),
+
+          
+      flightNotEnd: async () => {
+        const { sessionId } = get();
       
-      flightEnd: () => set({
-        isFlying: false,
-        flightName: null,
-        destination: null,
-        startedAt: null,
-        estimatedMinutes: null,
-        sessionId: null,
-      }),
+        if (sessionId) {
+          await stopSession(String(sessionId));
+        }
+      
+        set({
+          isFlying: false,
+          sessionId: null,
+          startedAt: null,
+          estimatedMinutes: null,
+          showFinishedModal: false,
+        });
+      },
+
+
+      flightEnd: async () => {
+        const { sessionId } = get();
+      
+        if (sessionId) {
+          await stopSession(String(sessionId));
+        }
+      
+        set({
+          isFlying: false,
+          sessionId: null,
+          startedAt: null,
+          estimatedMinutes: null,
+          showFinishedModal: true,
+        });
+      },
+      
+      
     }),
     {
-      name: 'flight-storage',  // localStorage 키 이름
+      name: 'flight-storage', 
     }
   )
 );

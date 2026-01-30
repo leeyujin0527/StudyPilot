@@ -13,6 +13,7 @@ const LoginForm = () => {
         try{
             await signInWithEmailAndPassword(auth, email, password)
             alert('로그인 성공')
+            console.log("Password:", password);
             router.push("/")
         }catch(error){
             console.log(error)
