@@ -42,6 +42,7 @@ export const useFlightStore = create<FlightStore>()(
       
         if (sessionId) {
           await stopSession(String(sessionId));
+          console.log(sessionId, "종료했습니다");
         }
       
         set({
@@ -59,6 +60,7 @@ export const useFlightStore = create<FlightStore>()(
       
         if (sessionId) {
           await stopSession(String(sessionId));
+          console.log(sessionId, "종료했습니다");
         }
       
         set({

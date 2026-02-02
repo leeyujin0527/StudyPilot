@@ -95,11 +95,19 @@ const RecordDashboard = () => {
           {weekly.days.map((d) => (
             <div key={d.date} className="flex flex-col items-center flex-1">
               <div
-                className="w-full transition-all bg-blue-400 rounded-md"
+                className="relative flex items-center justify-center w-full transition-all bg-blue-400 rounded-md group"
                 style={{
                   height: `${Math.max(d.totalMinutes * 2, 4)}px`,
                 }}
-              />
+              >
+                {(d.totalMinutes>=1)? 
+                 <span className="absolute text-3xl text-white transition-transform scale-0 group-hover:scale-100 -top-10 whitespace-nowrap">
+                 {d.totalMinutes}분
+               </span> :
+                <span className=""></span>}
+               
+              
+              </div>
               <span className="mt-2 text-xs text-white/70">
                 {d.date.slice(5)}
               </span>
