@@ -94,7 +94,6 @@ const RecordPage = () => {
           나의 비행 티켓
         </span>
 
-        {/* 기록 리스트 */}
         <SessionList session={session} />
       </div>
     </div>

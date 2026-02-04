@@ -27,60 +27,67 @@ const Header = () => {
 };
 
   return (
-    <header className="fixed top-0 left-0 z-50 flex items-center justify-between w-full h-16 px-6 bg-transparent">
-      <div onClick={() => router.push("/")} className="text-white cursor-pointer">
-        <Image
-        src="/logo.png"
-        alt="logo"
-        width={70}
-        height={70}/>
+<header className="fixed top-0 left-0 z-50 flex items-center justify-between w-full h-16 px-4 bg-transparent sm:px-6">
+  {/* 로고 */}
+  <div onClick={() => router.push("/")} className="flex-shrink-0 text-white cursor-pointer">
+    <Image
+      src="/logo.png"
+      alt="logo"
+      width={70}
+      height={70}
+      className="w-12 sm:w-16 md:w-[70px]"
+    />
+  </div>
+
+  {/* 네비게이션 - 모든 화면에서 표시 */}
+  <nav className="flex flex-row gap-3 text-sm font-medium text-white sm:gap-6 md:gap-10 lg:gap-20 sm:text-base">
+    <div
+      onClick={() => router.push("/")}
+      className="cursor-pointer hover:text-[#7FE067] transition whitespace-nowrap"
+    >
+      홈
+    </div>
+    <div
+      onClick={() => router.push("/flight")}
+      className="cursor-pointer hover:text-[#7FE067] transition whitespace-nowrap"
+    >
+      비행하기
+    </div>
+    <div
+      onClick={() => router.push("/record")}
+      className="cursor-pointer hover:text-[#7FE067] transition whitespace-nowrap"
+    >
+      기록
+    </div>
+  </nav>
+
+  {/* 로그인/회원가입 */}
+  <div className="flex flex-row gap-1 sm:gap-2.5 flex-shrink-0">
+    {user ? (
+      <div
+        onClick={handleLogout}
+        className="cursor-pointer px-2 sm:px-3 py-1.5 text-white font-bold text-sm sm:text-base whitespace-nowrap"
+      >
+        로그아웃
       </div>
-      <nav className="flex flex-row gap-20 font-medium text-gray-700">
+    ) : (
+      <>
         <div
-          onClick={() => router.push("/")}
-          className="cursor-pointer hover:text-[#7FE067] transition text-white"
+          onClick={() => router.push("/login")}
+          className="cursor-pointer px-2 sm:px-3 py-1.5 text-white font-bold text-sm sm:text-base whitespace-nowrap"
         >
-          홈
+          로그인
         </div>
         <div
-          onClick={() => router.push("/flight")}
-          className="cursor-pointer hover:text-[#7FE067] transition text-white"
+          onClick={() => router.push("/signup")}
+          className="cursor-pointer px-2 sm:px-3 py-1.5 text-white font-bold text-sm sm:text-base whitespace-nowrap"
         >
-          비행하기
+          회원가입
         </div>
-        <div
-          onClick={() => router.push("/record")}
-          className="cursor-pointer hover:text-[#7FE067] transition text-white"
-        >
-          기록
-        </div>
-      </nav>
-     <div className="flex flex-row gap-2.5">
-        {user ? (
-          <div
-            onClick={handleLogout}
-            className="cursor-pointer px-3 py-1.5 text-white font-bold"
-          >
-            로그아웃
-          </div>
-        ) : (
-          <>
-            <div
-              onClick={() => router.push("/login")}
-              className="cursor-pointer px-3 py-1.5 text-white font-bold"
-            >
-              로그인
-            </div>
-            <div
-              onClick={() => router.push("/signup")}
-              className="cursor-pointer px-3 py-1.5 text-white font-bold"
-            >
-              회원가입
-            </div>
-          </>
-        )}
-      </div>
-    </header>
+      </>
+    )}
+  </div>
+</header>
   );
 };
 

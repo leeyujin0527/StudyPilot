@@ -1,6 +1,7 @@
 import { create, } from 'zustand';
 import { persist} from 'zustand/middleware';
 import { stopSession } from '../api/patch-session';
+import { Checklist } from '../type/checklist-type';
 
 interface FlightStore {
   isFlying: boolean;
@@ -10,10 +11,12 @@ interface FlightStore {
   estimatedMinutes: number | null;
   sessionId: string | null;
   showFinishedModal : boolean;
+  checklists : Checklist[];
   
   setSession: (session: any) => void;
   flightEnd: () => void;
   flightNotEnd: () => void;
+  setChecklists: (checklists: Checklist[]) => void;
 }
 
 export const useFlightStore = create<FlightStore>()(
@@ -26,7 +29,9 @@ export const useFlightStore = create<FlightStore>()(
       estimatedMinutes: null,
       sessionId: null,
       showFinishedModal : false,
+      checklists : [],
       
+
       setSession: (session) => set({
         isFlying: true,
         flightName: session.flightName,
@@ -36,13 +41,15 @@ export const useFlightStore = create<FlightStore>()(
         sessionId: session.sessionId,
       }),
 
+      
+
           
       flightNotEnd: async () => {
-        const { sessionId } = get();
+        const { sessionId, checklists} = get();
       
         if (sessionId) {
-          await stopSession(String(sessionId));
-          console.log(sessionId, "종료했습니다");
+          await stopSession(String(sessionId),checklists);
+          console.log(sessionId, checklists, "종료했습니다");
         }
       
         set({
@@ -51,15 +58,16 @@ export const useFlightStore = create<FlightStore>()(
           startedAt: null,
           estimatedMinutes: null,
           showFinishedModal: false,
+          checklists : []
         });
       },
 
 
       flightEnd: async () => {
-        const { sessionId } = get();
+        const { sessionId, checklists } = get();
       
         if (sessionId) {
-          await stopSession(String(sessionId));
+          await stopSession(String(sessionId),checklists);
           console.log(sessionId, "종료했습니다");
         }
       
@@ -69,7 +77,12 @@ export const useFlightStore = create<FlightStore>()(
           startedAt: null,
           estimatedMinutes: null,
           showFinishedModal: true,
+          checklists : []
         });
+      },
+
+      setChecklists: (checklists: Checklist[]) => {
+        set({ checklists });
       },
       
       

@@ -117,10 +117,10 @@ const handleEnd = async() => {
             </div>
           </div>
 
-          <div className="flex-shrink-0 w-px h-12 bg-slate-600"></div>
+          <div className="w-px h-12 shrink-0 bg-slate-600"></div>
 
           {/* 버튼 */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <button 
               onClick={handleNotEnd}
               className="flex items-center gap-3 px-8 py-3 transition-colors border-2 rounded-full bg-red-950/50 border-red-500/50 hover:bg-red-900/50"

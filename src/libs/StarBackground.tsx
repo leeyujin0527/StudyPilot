@@ -15,7 +15,7 @@ export default function StarBackground() {
   return (
     <Particles
       id="tsparticles"
-      className="absolute inset-0 z-0"
+      className="inset-0 z-0"
       options={{
         background: {
           color: "#000000",

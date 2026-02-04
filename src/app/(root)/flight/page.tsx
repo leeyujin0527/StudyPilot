@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { getSession } from '@/src/feature/flight/api/session-get';
 import FinisedModal from '@/src/feature/flight/ui/finisedModal';
+import CheckLIstModal from '@/src/feature/flight/ui/checkLIstModal';
 
 const MapPage = () => {
   const [isModal, setIsModal] = useState(false);
@@ -36,6 +37,7 @@ const MapPage = () => {
     <div>
       <Map/>
       <FlightButton onOpen={() => setIsModal(true)}/>
+      <CheckLIstModal/>
       {isModal &&
         <FlightModal/>}
       <FlightDashboard/>
