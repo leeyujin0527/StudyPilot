@@ -1,18 +1,25 @@
+"use client"
 import Image from "next/image";
 import StarBackground from "@/src/libs/StarBackground";
+import 'animate.css';
+import { useRouter } from "next/navigation";
+
 export default function Home() {
+  const router = useRouter();
   return (
 <div className="relative w-full h-screen overflow-hidden bg-black">
   <StarBackground />
 
   {/* 텍스트: 화면 기준 정중앙 - 반응형 */}
   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
-    <span className="mb-2 text-sm text-white sm:text-base md:text-xl lg:text-2xl md:mb-4">
+    <span className="mb-2 text-sm text-white sm:text-base md:text-xl lg:text-2xl md:mb-4 animate__animated animate__jackInTheBox">
       집중력이 필요할 때, 떠나는 비행
     </span>
-    <span className="text-4xl font-bold text-white sm:text-5xl md:text-6xl lg:text-7xl">
+    <span className="text-4xl font-bold text-white sm:text-5xl md:text-6xl lg:text-7xl animate__animated animate__jackInTheBox">
       Study Pilot
     </span>
+    <button className="px-8 py-2 mt-6 text-2xl font-bold bg-white rounded-4xl animate__animated animate__headShake" onClick={() => router.push('/flight')
+    }>비행하러 가기</button>
   </div>
 
   {/* 오른쪽 구름 캐릭터 - 반응형 */}
@@ -23,7 +30,7 @@ export default function Home() {
     height={400}
     className="absolute right-2 top-1/2 -translate-y-1/2 
                w-32 sm:w-40 md:w-56 lg:w-80 xl:w-[470px]
-               opacity-80 sm:opacity-90 md:opacity-100"
+               opacity-80 sm:opacity-90 md:opacity-100 animate__animated animate__slideInRight"
   />
 
   {/* 왼쪽 구름 캐릭터 - 반응형 */}
@@ -34,7 +41,7 @@ export default function Home() {
     height={400}
     className="absolute left-2 top-8 sm:top-10 md:top-12 lg:top-16
                w-32 sm:w-48 md:w-64 lg:w-80 xl:w-[470px]
-               opacity-80 sm:opacity-90 md:opacity-100"
+               opacity-80 sm:opacity-90 md:opacity-100 animate__animated animate__slideInLeft"
   />
 </div>
   

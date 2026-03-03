@@ -91,11 +91,11 @@ const RecordDashboard = () => {
           최근 7일 공부 기록
         </div>
 
-        <div className="flex items-end h-40 gap-3">
+        <div className="flex items-end gap-3 min-h-40">
           {weekly.days.map((d) => (
             <div key={d.date} className="flex flex-col items-center flex-1">
               <div
-                className="relative flex items-center justify-center w-full transition-all bg-blue-400 rounded-md group"
+                className="relative flex items-center justify-center w-full mt-3 transition-all bg-blue-400 rounded-md group"
                 style={{
                   height: `${Math.max(d.totalMinutes * 2, 4)}px`,
                 }}

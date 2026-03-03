@@ -1,6 +1,6 @@
 import { create, } from 'zustand';
 import { persist} from 'zustand/middleware';
-import { stopSession } from '../api/patch-session';
+import { stopSession } from '../api/stop-session';
 import { Checklist } from '../type/checklist-type';
 
 interface FlightStore {

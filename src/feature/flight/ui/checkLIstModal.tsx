@@ -20,7 +20,7 @@ const CheckLIstModal = () => {
     setChecklists(list);
   }, [list, setChecklists]);
   return (
-    <div className="fixed z-50 top-20 left-6">
+    <div className="relative z-50 top-20 left-6">
       <label className="flex flex-col items-center gap-2 px-3 py-2 rounded shadow bg-white/30">
         <div className="text-2xl font-bold text-white">체크리스트</div>
         {list.map((m, index) => (
