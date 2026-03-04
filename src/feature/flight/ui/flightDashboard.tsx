@@ -120,7 +120,18 @@ const handleEnd = async() => {
           <div className="w-px h-12 shrink-0 bg-slate-600"></div>
 
           {/* 버튼 */}
-          <div className="shrink-0">
+          <div className="flex flex-row gap-3 shrink-0">
+            <button 
+              onClick={handleNotEnd}
+              className="flex items-center gap-3 px-5 py-3 transition-colors border-2 rounded-full bg-red-950/50 border-red-500/50 hover:bg-red-900/50"
+            >
+              <div className="flex items-center justify-center w-6 h-6 bg-orange-400 rounded-sm">
+                <div className="w-3 h-3 bg-white rounded-sm"></div>
+              </div>
+              <span className="text-lg font-bold text-orange-400 whitespace-nowrap">
+                정지
+              </span>
+            </button>
             <button 
               onClick={handleNotEnd}
               className="flex items-center gap-3 px-8 py-3 transition-colors border-2 rounded-full bg-red-950/50 border-red-500/50 hover:bg-red-900/50"

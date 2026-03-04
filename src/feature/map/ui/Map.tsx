@@ -22,16 +22,10 @@ export default function Map() {
   const startedAt = useFlightStore((s) => s.startedAt);
   const estimatedMinutes = useFlightStore((s) => s.estimatedMinutes);
 
-  /* =====================
-     isFlying ref 동기화
-  ===================== */
   useEffect(() => {
     isFlyingRef.current = isFlying;
   }, [isFlying]);
 
-  /* =====================
-     지도 생성 (1회)
-  ===================== */
   useEffect(() => {
     if (!mapContainer.current) return;
 
@@ -54,16 +48,10 @@ export default function Map() {
     };
   }, []);
 
-  /* =====================
-     비행 시작 / 중단
-  ===================== */
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // =====================
-    // ✈️ 비행 중단
-    // =====================
     if (!isFlying) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -71,16 +59,11 @@ export default function Map() {
       }
 
       if (map.getLayer("plane-layer")) map.removeLayer("plane-layer");
-      if (map.getLayer("flight-route-line"))
-        map.removeLayer("flight-route-line");
-
+      if (map.getLayer("flight-route-line")) map.removeLayer("flight-route-line");
       if (map.getSource("plane")) map.removeSource("plane");
-      if (map.getSource("flight-route"))
-        map.removeSource("flight-route");
+      if (map.getSource("flight-route")) map.removeSource("flight-route");
 
-      document
-        .querySelectorAll(".mapboxgl-marker")
-        .forEach((m) => m.remove());
+      document.querySelectorAll(".mapboxgl-marker").forEach((m) => m.remove());
 
       map.easeTo({
         center: ORIGIN,
@@ -93,21 +76,13 @@ export default function Map() {
       return;
     }
 
-    // =====================
-    // ✈️ 비행 시작
-    // =====================
     const startFlight = async () => {
       if (!destination) return;
 
       const destinationGeo = await getGeoCoding(String(destination));
 
-      new mapboxgl.Marker({ color: "blue", scale: 2 })
-        .setLngLat(ORIGIN)
-        .addTo(map);
-
-      new mapboxgl.Marker({ color: "red", scale: 2 })
-        .setLngLat(destinationGeo)
-        .addTo(map);
+      new mapboxgl.Marker({ color: "blue", scale: 2 }).setLngLat(ORIGIN).addTo(map);
+      new mapboxgl.Marker({ color: "red", scale: 2 }).setLngLat(destinationGeo).addTo(map);
 
       if (!map.hasImage("flight-icon")) {
         map.loadImage("/flight.png", (err, image) => {
@@ -129,7 +104,7 @@ export default function Map() {
         source: "flight-route",
         paint: {
           "line-color": "#ffffff",
-          "line-width": 3,
+          "line-width": 5,
         },
       });
 
@@ -169,24 +144,22 @@ export default function Map() {
         },
       });
 
+      map.flyTo({
+        center: ORIGIN,
+        zoom: 13,
+        duration: 800,
+      });
+
       const animatePlane = () => {
         if (!isFlyingRef.current) return;
 
         const elapsed =
-          (Date.now() - new Date(String(startedAt)).getTime()) /
-          (1000 * 60);
+          (Date.now() - new Date(String(startedAt)).getTime()) / (1000 * 60);
 
-        const progress = Math.min(
-          elapsed / Number(estimatedMinutes),
-          1
-        );
-
+        const progress = Math.min(elapsed / Number(estimatedMinutes), 1);
         const distance = lineDistance * progress;
 
-        const currentPoint = turf.along(line, distance, {
-          units: "kilometers",
-        });
-
+        const currentPoint = turf.along(line, distance, { units: "kilometers" });
         const nextPoint = turf.along(
           line,
           Math.min(distance + 0.05, lineDistance),
@@ -195,35 +168,28 @@ export default function Map() {
 
         const bearing = turf.bearing(currentPoint, nextPoint);
 
-        planeFeature.geometry.coordinates =
-          currentPoint.geometry.coordinates;
+        planeFeature.geometry.coordinates = currentPoint.geometry.coordinates;
         planeFeature.properties!.bearing = bearing;
 
-        (
-          map.getSource("plane") as mapboxgl.GeoJSONSource
-        ).setData(planeFeature);
+        (map.getSource("plane") as mapboxgl.GeoJSONSource).setData(planeFeature);
 
         map.easeTo({
           center: currentPoint.geometry.coordinates as [number, number],
           bearing,
-          zoom: map.getZoom(),
           pitch: map.getPitch(),
           duration: 300,
           easing: (t) => t,
         });
 
         if (progress < 1) {
-          animationRef.current =
-            requestAnimationFrame(animatePlane);
+          animationRef.current = requestAnimationFrame(animatePlane);
         }
       };
 
-      animatePlane();
-
-      map.fitBounds([ORIGIN, destinationGeo], {
-        padding: 120,
-        duration: 1000,
-      });
+      // ✅ flyTo 끝난 후 애니메이션 시작
+      setTimeout(() => {
+        animatePlane();
+      }, 850);
     };
 
     if (map.isStyleLoaded()) {
