@@ -18,13 +18,19 @@ export default function Map() {
   const isFlyingRef = useRef<boolean>(false);
 
   const isFlying = useFlightStore((s) => s.isFlying);
+  const isPaused = useFlightStore((s) => s.isPaused);
   const destination = useFlightStore((s) => s.destination);
   const startedAt = useFlightStore((s) => s.startedAt);
   const estimatedMinutes = useFlightStore((s) => s.estimatedMinutes);
 
   useEffect(() => {
-    isFlyingRef.current = isFlying;
-  }, [isFlying]);
+    isFlyingRef.current = isFlying && !isPaused;
+
+    if (isPaused && animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  }, [isFlying, isPaused]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -52,7 +58,8 @@ export default function Map() {
     const map = mapRef.current;
     if (!map) return;
 
-    if (!isFlying) {
+    // ✈️ 완전 종료
+    if (!isFlying && !isPaused) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
@@ -76,11 +83,19 @@ export default function Map() {
       return;
     }
 
+    // ✈️ 일시정지 - 아무것도 안 함
+    if (!isFlying && isPaused) return;
+    if (isPaused) return;
+
+    // ✈️ 비행 시작 / 재개
+    const isResume = !!map.getSource("plane"); // 소스가 있으면 resume
+
     const startFlight = async () => {
       if (!destination) return;
 
       const destinationGeo = await getGeoCoding(String(destination));
 
+      document.querySelectorAll(".mapboxgl-marker").forEach((m) => m.remove());
       new mapboxgl.Marker({ color: "blue", scale: 2 }).setLngLat(ORIGIN).addTo(map);
       new mapboxgl.Marker({ color: "red", scale: 2 }).setLngLat(destinationGeo).addTo(map);
 
@@ -93,20 +108,24 @@ export default function Map() {
       const line = turf.lineString([ORIGIN, destinationGeo]);
       const lineDistance = turf.length(line, { units: "kilometers" });
 
-      map.addSource("flight-route", {
-        type: "geojson",
-        data: line as Feature<LineString>,
-      });
+      if (!map.getSource("flight-route")) {
+        map.addSource("flight-route", {
+          type: "geojson",
+          data: line as Feature<LineString>,
+        });
+      }
 
-      map.addLayer({
-        id: "flight-route-line",
-        type: "line",
-        source: "flight-route",
-        paint: {
-          "line-color": "#ffffff",
-          "line-width": 5,
-        },
-      });
+      if (!map.getLayer("flight-route-line")) {
+        map.addLayer({
+          id: "flight-route-line",
+          type: "line",
+          source: "flight-route",
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 5,
+          },
+        });
+      }
 
       const planeFeature: Feature<Point> = {
         type: "Feature",
@@ -117,38 +136,45 @@ export default function Map() {
         properties: { bearing: 0 },
       };
 
-      map.addSource("plane", {
-        type: "geojson",
-        data: planeFeature,
-      });
+      if (!map.getSource("plane")) {
+        map.addSource("plane", {
+          type: "geojson",
+          data: planeFeature,
+        });
+      }
 
-      map.addLayer({
-        id: "plane-layer",
-        type: "symbol",
-        source: "plane",
-        layout: {
-          "icon-image": "flight-icon",
-          "icon-size": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            3, 0.25,
-            7, 0.15,
-            12, 0.08,
-            15, 0.05,
-          ],
-          "icon-rotate": ["get", "bearing"],
-          "icon-rotation-alignment": "map",
-          "icon-pitch-alignment": "map",
-          "icon-allow-overlap": true,
-        },
-      });
+      if (!map.getLayer("plane-layer")) {
+        map.addLayer({
+          id: "plane-layer",
+          type: "symbol",
+          source: "plane",
+          layout: {
+            "icon-image": "flight-icon",
+            "icon-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              3, 0.25,
+              7, 0.15,
+              12, 0.08,
+              15, 0.05,
+            ],
+            "icon-rotate": ["get", "bearing"],
+            "icon-rotation-alignment": "map",
+            "icon-pitch-alignment": "map",
+            "icon-allow-overlap": true,
+          },
+        });
+      }
 
-      map.flyTo({
-        center: ORIGIN,
-        zoom: 13,
-        duration: 800,
-      });
+      // resume이면 flyTo 스킵
+      if (!isResume) {
+        map.flyTo({
+          center: ORIGIN,
+          zoom: 13,
+          duration: 800,
+        });
+      }
 
       const animatePlane = () => {
         if (!isFlyingRef.current) return;
@@ -186,10 +212,15 @@ export default function Map() {
         }
       };
 
-      // ✅ flyTo 끝난 후 애니메이션 시작
-      setTimeout(() => {
+      // resume이면 바로 시작, 처음이면 flyTo 끝나고 시작
+      if (isResume) {
+        isFlyingRef.current = true;
         animatePlane();
-      }, 850);
+      } else {
+        setTimeout(() => {
+          animatePlane();
+        }, 850);
+      }
     };
 
     if (map.isStyleLoaded()) {
@@ -197,7 +228,7 @@ export default function Map() {
     } else {
       map.once("load", startFlight);
     }
-  }, [isFlying, destination, startedAt, estimatedMinutes]);
+  }, [isFlying, isPaused, destination, startedAt, estimatedMinutes]);
 
   return (
     <div className="w-full h-screen">

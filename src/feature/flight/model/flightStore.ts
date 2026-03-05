@@ -2,9 +2,12 @@ import { create, } from 'zustand';
 import { persist} from 'zustand/middleware';
 import { stopSession } from '../api/stop-session';
 import { Checklist } from '../type/checklist-type';
+import { resumeSession } from '../api/resume-session';
+import { pauseSession } from '../api/pause-session';
 
 interface FlightStore {
   isFlying: boolean;
+  isPaused: boolean;
   flightName: string | null;
   destination: string | null;
   startedAt: string | null;
@@ -17,12 +20,15 @@ interface FlightStore {
   flightEnd: () => void;
   flightNotEnd: () => void;
   setChecklists: (checklists: Checklist[]) => void;
+  flightResume: () => void;
+  flightPause: () => void;
 }
 
 export const useFlightStore = create<FlightStore>()(
   persist( 
     (set,get) => ({
       isFlying: false,
+      isPaused: false,
       flightName: null,
       destination: null,
       startedAt: null,
@@ -43,7 +49,7 @@ export const useFlightStore = create<FlightStore>()(
 
       
 
-          
+      //비행 퍼센트 100% 못 채웠다는 뜻
       flightNotEnd: async () => {
         const { sessionId, checklists} = get();
       
@@ -83,6 +89,26 @@ export const useFlightStore = create<FlightStore>()(
 
       setChecklists: (checklists: Checklist[]) => {
         set({ checklists });
+      },
+
+      flightResume: async () => {
+        const { sessionId, isPaused } = get();
+        if (!sessionId || !isPaused) return; // ← pause 상태일 때만 resume
+        await resumeSession(String(sessionId));
+        set({
+          isFlying: true,
+          isPaused: false,
+        });
+      },
+      
+      flightPause: async () => {
+        const { sessionId, isPaused } = get();
+        if (!sessionId || isPaused) return; // ← 이미 pause면 무시
+        await pauseSession(String(sessionId));
+        set({
+          isFlying: true,
+          isPaused: true,
+        });
       },
       
       
