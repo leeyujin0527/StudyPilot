@@ -9,33 +9,34 @@ import { Session } from "../type/getSessionAllResponse";
 import { auth } from "@/src/libs/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { FaCalendar } from "react-icons/fa";
+import CustomCalendar from "./Calendar";
 
 const RecordPage = () => {
-
-    
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<Session[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Firebase 인증 체크
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log('✅ 로그인됨:', user.email);
-        user.getIdToken().then(token => {
-          console.log('✅ Token:', token.substring(0, 20) + '...');
+        console.log("✅ 로그인됨:", user.email);
+        user.getIdToken().then((token) => {
+          console.log("✅ Token:", token.substring(0, 20) + "...");
           setAuthChecked(true); // 인증 확인 완료
         });
       } else {
-        console.log('❌ 로그인 안 됨 - /login으로 이동');
-        window.location.href = '/login';
+        console.log("❌ 로그인 안 됨 - /login으로 이동");
+        window.location.href = "/login";
       }
     });
-    
+
     return () => unsubscribe();
   }, []);
-  
 
   // 세션 데이터 가져오기 (인증 확인 후에만 실행)
   useEffect(() => {
@@ -43,9 +44,9 @@ const RecordPage = () => {
 
     const fetchSessions = async () => {
       try {
-        console.log('📡 Fetching sessions...');
+        console.log("📡 Fetching sessions...");
         const res = await getSessionAll();
-        console.log('✅ Sessions fetched:', res);
+        console.log("✅ Sessions fetched:", res);
         setSession(res.sessions);
       } catch (error) {
         console.error("❌ session all fail", error);
@@ -53,9 +54,9 @@ const RecordPage = () => {
         setLoading(false);
       }
     };
-    
+
     fetchSessions();
-  }, [authChecked]); 
+  }, [authChecked]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -90,11 +91,31 @@ const RecordPage = () => {
         {/* 대시보드 */}
         <RecordDashboard />
 
-        <span className="text-white text-[35px] font-bold">
-          나의 비행 티켓
-        </span>
+        <div className="flex flex-row items-center">
+          <span className="text-white text-[35px] font-bold">
+            나의 비행 티켓
+          </span>
+          <FaCalendar
+            size={26}
+            color="white"
+            onClick={() => setOpen(!open)}
+            className="ml-3 transition cursor-pointer hover:scale-110"
+          />
+          <span className="ml-3 text-xl text-white">
+            {selectedDate.toLocaleDateString()}
+          </span>
+        </div>
 
-        <SessionList session={session} />
+        {open && (
+          <div className="p-4 mt-4 bg-white shadow-lg w-fit rounded-xl">
+            <CustomCalendar
+              selectedDate={selectedDate}
+              onChange={setSelectedDate}
+            />
+          </div>
+        )}
+
+        <SessionList session={session} date={selectedDate.toISOString()} />
       </div>
     </div>
   );

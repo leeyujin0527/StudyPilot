@@ -4,10 +4,13 @@ import ChecklistModal from "./ChecklistModal";
 
 interface Props {
   session: Session[];
+  date: string;
 }
 
-const SessionList = ({ session }: Props) => {
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+const SessionList = ({ session, date }: Props) => {
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null
+  );
 
   const formatTime = (iso: string) =>
     new Date(iso).toLocaleTimeString("ko-KR", {
@@ -15,11 +18,16 @@ const SessionList = ({ session }: Props) => {
       minute: "2-digit",
       hour12: true,
     });
+  const filteredSession = session.filter((s) => {
+    const sessionDate = new Date(s.startedAt).toDateString();
+    const selected = new Date(date).toDateString();
+    return sessionDate === selected;
+  });
 
   return (
     <>
       <div className="grid justify-center grid-cols-1 gap-20 mt-5 md:grid-cols-2 xl:grid-cols-3">
-        {session.map((s) => (
+        {filteredSession.map((s) => (
           <div
             key={s.sessionId}
             onClick={() => setSelectedSessionId(s.sessionId)}
@@ -29,9 +37,7 @@ const SessionList = ({ session }: Props) => {
               <span className="text-3xl font-black text-[#7FE067]">
                 {s.flightName}
               </span>
-              <div className="text-lg">
-                study time · {s.actualMinutes} min
-              </div>
+              <div className="text-lg">study time · {s.actualMinutes} min</div>
             </div>
 
             <div className="flex items-center justify-between">
