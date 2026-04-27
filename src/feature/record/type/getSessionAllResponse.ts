@@ -7,9 +7,12 @@ export interface Session {
     estimatedMinutes: number;
     actualMinutes: number;
     startedAt: string;   
-    endedAt: string;     
+    endedAt: string; 
+    status : string;    
     isCompleted: boolean;
     progressPercentage: number;
+    pauseCount : number;
+    totalPauseMinutes : number
   }
 export interface GetSessionAllResponse {
     totalCount: number;

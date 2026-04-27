@@ -2,6 +2,9 @@ import { useFlightStore } from "../model/flightStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { stopFocusSound } from "@/src/libs/flightSound";
+import { usePause } from "../model/usePause";
+import { useResume } from "../model/useResume";
+
 
 function FlightDashboard() {
   const {
@@ -11,13 +14,16 @@ function FlightDashboard() {
     destination,
     startedAt,
     estimatedMinutes,
+    sessionId,
     flightEnd,
     flightNotEnd,
     flightPause,
-    flightResume,
+    flightResume
   } = useFlightStore();
 
   const router = useRouter();
+  const { mutate : pauseMutate} = usePause();
+  const { mutate : resumeMutate} = useResume();
 
   const handleEnd = async () => {
     flightEnd();
@@ -28,15 +34,22 @@ function FlightDashboard() {
     stopFocusSound();
     router.push("/record");
   };
-  const handlePause = async () => {
-    await flightPause();
+  const handlePause = () => {
+    pauseMutate(String(sessionId), {
+      onSuccess: () => {
+        flightPause();
+      }
+    });
   };
   const handleResume = async () => {
-    await flightResume();
+    resumeMutate(String(sessionId), {
+      onSuccess: () => {
+        flightResume();
+      }
+    });
   };
 
   const [progress, setProgress] = useState(0);
-
   useEffect(() => {
     if (progress >= 100) {
       handleEnd();

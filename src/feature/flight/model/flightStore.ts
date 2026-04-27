@@ -1,9 +1,7 @@
-import { create, } from 'zustand';
-import { persist} from 'zustand/middleware';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { stopSession } from '../api/stop-session';
 import { Checklist } from '../type/checklist-type';
-import { resumeSession } from '../api/resume-session';
-import { pauseSession } from '../api/pause-session';
 
 interface FlightStore {
   isFlying: boolean;
@@ -13,9 +11,9 @@ interface FlightStore {
   startedAt: string | null;
   estimatedMinutes: number | null;
   sessionId: string | null;
-  showFinishedModal : boolean;
-  checklists : Checklist[];
-  
+  showFinishedModal: boolean;
+  checklists: Checklist[];
+
   setSession: (session: any) => void;
   flightEnd: () => void;
   flightNotEnd: () => void;
@@ -25,8 +23,8 @@ interface FlightStore {
 }
 
 export const useFlightStore = create<FlightStore>()(
-  persist( 
-    (set,get) => ({
+  persist(
+    (set, get) => ({
       isFlying: false,
       isPaused: false,
       flightName: null,
@@ -34,9 +32,8 @@ export const useFlightStore = create<FlightStore>()(
       startedAt: null,
       estimatedMinutes: null,
       sessionId: null,
-      showFinishedModal : false,
-      checklists : [],
-      
+      showFinishedModal: false,
+      checklists: [],
 
       setSession: (session) => set({
         isFlying: true,
@@ -47,44 +44,41 @@ export const useFlightStore = create<FlightStore>()(
         sessionId: session.sessionId,
       }),
 
-      
-
-      //비행 퍼센트 100% 못 채웠다는 뜻
+      // ✅ 변경: finally로 묶어서 API 실패해도 무조건 초기화, 중복 set() 제거
       flightNotEnd: async () => {
-        const { sessionId, checklists} = get();
-      
-        if (sessionId) {
-          await stopSession(String(sessionId),checklists);
-          console.log(sessionId, checklists, "종료했습니다");
+        const { sessionId, checklists } = get();
+        try {
+          if (sessionId) await stopSession(String(sessionId), checklists);
+        } finally {
+          set({
+            isFlying: false,
+            isPaused: false,
+            sessionId: null,
+            startedAt: null,
+            estimatedMinutes: null,
+            showFinishedModal: false,
+            checklists: [],
+          });
         }
-      
-        set({
-          isFlying: false,
-          sessionId: null,
-          startedAt: null,
-          estimatedMinutes: null,
-          showFinishedModal: false,
-          checklists : []
-        });
       },
 
-
+      // ✅ 변경: finally로 묶어서 API 실패해도 무조건 초기화
       flightEnd: async () => {
         const { sessionId, checklists } = get();
-      
-        if (sessionId) {
-          await stopSession(String(sessionId),checklists);
+        try {
+          if (sessionId) await stopSession(String(sessionId), checklists);
           console.log(sessionId, "종료했습니다");
+        } finally {
+          set({
+            isFlying: false,
+            isPaused: false,
+            sessionId: null,
+            startedAt: null,
+            estimatedMinutes: null,
+            showFinishedModal: true,
+            checklists: [],
+          });
         }
-      
-        set({
-          isFlying: false,
-          sessionId: null,
-          startedAt: null,
-          estimatedMinutes: null,
-          showFinishedModal: true,
-          checklists : []
-        });
       },
 
       setChecklists: (checklists: Checklist[]) => {
@@ -93,28 +87,28 @@ export const useFlightStore = create<FlightStore>()(
 
       flightResume: async () => {
         const { sessionId, isPaused } = get();
-        if (!sessionId || !isPaused) return; // ← pause 상태일 때만 resume
-        await resumeSession(String(sessionId));
-        set({
-          isFlying: true,
-          isPaused: false,
-        });
+        if (!sessionId || !isPaused) return;
+        set({ isFlying: true, isPaused: false });
       },
-      
+
       flightPause: async () => {
         const { sessionId, isPaused } = get();
-        if (!sessionId || isPaused) return; // ← 이미 pause면 무시
-        await pauseSession(String(sessionId));
-        set({
-          isFlying: true,
-          isPaused: true,
-        });
+        if (!sessionId || isPaused) return;
+        set({ isFlying: true, isPaused: true });
       },
-      
-      
     }),
     {
-      name: 'flight-storage', 
+      name: 'flight-storage',
+      partialize: (state) => ({
+        isFlying: state.isFlying,
+        isPaused: state.isPaused,
+        flightName: state.flightName,
+        destination: state.destination,
+        startedAt: state.startedAt,
+        estimatedMinutes: state.estimatedMinutes,
+        sessionId: state.sessionId,
+        checklists: state.checklists,
+      }),
     }
   )
 );

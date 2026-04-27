@@ -13,6 +13,9 @@ import CheckLIstModal from "@/src/feature/flight/ui/checkLIstModal";
 import SoundOnOff from "@/src/feature/flight/ui/soundOnOff";
 
 const MapPage = () => {
+  useEffect(() => {
+    useFlightStore.setState({ showFinishedModal: false }); // ← 이거
+  }, []);
   const [isModal, setIsModal] = useState(false);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");

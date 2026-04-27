@@ -34,7 +34,7 @@ const SessionList = ({ session, date }: Props) => {
             className="flex flex-col max-w-2xl gap-6 px-6 py-5 border shadow-lg cursor-pointer bg-white/90 rounded-2xl hover:rotate-[-1deg] transition-transform"
           >
             <div className="flex items-center justify-between">
-              <span className="text-3xl font-black text-[#7FE067]">
+              <span className="text-3xl font-black text-[#52A2FF]">
                 {s.flightName}
               </span>
               <div className="text-lg">study time · {s.actualMinutes} min</div>
