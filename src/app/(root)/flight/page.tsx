@@ -1,6 +1,6 @@
 "use client";
 import FlightButton from "@/src/shared/ui/flightButton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import FlightModal from "@/src/feature/flight/ui/flightModal";
 import FlightDashboard from "@/src/feature/flight/ui/flightDashboard";
 import { useFlightStore } from "@/src/feature/flight/model/flightStore";
@@ -16,13 +16,12 @@ const Map = dynamic(() => import("@/src/feature/map/ui/Map"), {
   loading: () => <div className="w-full h-screen bg-black" />,
 });
 
-const MapPage = () => {
+const FlightContent = () => {
   const [isModal, setIsModal] = useState(false);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const { showFinishedModal } = useFlightStore();
 
-  // 중복 제거 - 하나만
   useEffect(() => {
     useFlightStore.setState({ showFinishedModal: false });
   }, []);
@@ -51,4 +50,12 @@ const MapPage = () => {
   );
 };
 
-export default MapPage;
+const MapPage = () => {
+  return (
+    <Suspense fallback={<div className="w-full h-screen bg-black" />}>
+      <FlightContent />
+    </Suspense>
+  );
+};
+
+export default MapPage; 
