@@ -65,7 +65,7 @@ const DonutChart = () => {
     colors: ["#0066FF", "#7AFFBF", "#00D1FF"],
     dataLabels: {
       enabled: true,
-      formatter: (_, opts) => `${focusTimes[labels[opts.seriesIndex]]}분`,
+      formatter: (_, opts) => `${focusTimes[labels[opts?.seriesIndex ?? 0]]}분`
     },
     plotOptions: {
       pie: {
@@ -92,7 +92,7 @@ const DonutChart = () => {
     tooltip: {
       y: {
         formatter: (_, opts) =>
-          `평균 ${focusTimes[labels[opts.seriesIndex]]}분 집중`,
+        `평균 ${focusTimes[labels[opts?.seriesIndex ?? 0]]}분 집중`,
       },
     },
     stroke: { width: 0 },
