@@ -1,38 +1,38 @@
 "use client";
-import Map from "@/src/feature/map/ui/Map";
 import FlightButton from "@/src/shared/ui/flightButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FlightModal from "@/src/feature/flight/ui/flightModal";
 import FlightDashboard from "@/src/feature/flight/ui/flightDashboard";
 import { useFlightStore } from "@/src/feature/flight/model/flightStore";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 import { getSession } from "@/src/feature/flight/api/session-get";
 import FinisedModal from "@/src/feature/flight/ui/finisedModal";
 import CheckLIstModal from "@/src/feature/flight/ui/checkLIstModal";
 import SoundOnOff from "@/src/feature/flight/ui/soundOnOff";
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import("@/src/feature/map/ui/Map"), {
+  ssr: false,
+  loading: () => <div className="w-full h-screen bg-black" />,
+});
 
 const MapPage = () => {
-  useEffect(() => {
-    useFlightStore.setState({ showFinishedModal: false }); // ← 이거
-  }, []);
   const [isModal, setIsModal] = useState(false);
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("sessionId");
   const { showFinishedModal } = useFlightStore();
+
+  // 중복 제거 - 하나만
   useEffect(() => {
     useFlightStore.setState({ showFinishedModal: false });
   }, []);
 
   useEffect(() => {
     if (!sessionId) return;
-
     const restoreSession = async () => {
       const session = await getSession(sessionId);
-
       useFlightStore.getState().setSession(session);
     };
-
     restoreSession();
   }, [sessionId]);
 

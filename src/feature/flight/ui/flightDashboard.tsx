@@ -1,10 +1,9 @@
 import { useFlightStore } from "../model/flightStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { stopFocusSound } from "@/src/libs/flightSound";
 import { usePause } from "../model/usePause";
 import { useResume } from "../model/useResume";
-
 
 function FlightDashboard() {
   const {
@@ -15,6 +14,7 @@ function FlightDashboard() {
     startedAt,
     estimatedMinutes,
     sessionId,
+    accumulatedMinutes,
     flightEnd,
     flightNotEnd,
     flightPause,
@@ -22,48 +22,53 @@ function FlightDashboard() {
   } = useFlightStore();
 
   const router = useRouter();
-  const { mutate : pauseMutate} = usePause();
-  const { mutate : resumeMutate} = useResume();
+  const { mutate: pauseMutate, isPending: isPauseLoading } = usePause();
+  const { mutate: resumeMutate, isPending: isResumeLoading } = useResume();
+  const isActionLoading = isPauseLoading || isResumeLoading;
 
   const handleEnd = async () => {
     flightEnd();
     stopFocusSound();
   };
+
   const handleNotEnd = async () => {
     flightNotEnd();
     stopFocusSound();
     router.push("/record");
   };
+
   const handlePause = () => {
+    if (isActionLoading) return; // 중복 클릭 방지
     pauseMutate(String(sessionId), {
       onSuccess: () => {
         flightPause();
       }
     });
   };
-  const handleResume = async () => {
+
+  const handleResume = () => {
+    if (isActionLoading) return; // 중복 클릭 방지
     resumeMutate(String(sessionId), {
-      onSuccess: () => {
-        flightResume();
+      onSuccess: (res) => {
+        flightResume(res); // store에 accumulatedMinutes, resumedAt 저장
       }
     });
   };
 
   const [progress, setProgress] = useState(0);
+
   useEffect(() => {
-    if (progress >= 100) {
-      handleEnd();
-    }
+    if (progress >= 100) handleEnd();
   }, [progress]);
 
   useEffect(() => {
-    // pause 중이거나 비행 중 아닐 때 interval 안 돌림
     if (!startedAt || !estimatedMinutes || !isFlying || isPaused) return;
 
     const calculateProgress = () => {
-      const start = new Date(startedAt);
-      const now = new Date();
-      const elapsedMinutes = (Number(now) - Number(start)) / (1000 * 60);
+      const elapsedMinutes =
+        (accumulatedMinutes ?? 0) +
+        (Date.now() - new Date(startedAt).getTime()) / (1000 * 60);
+
       const calculated = Math.min(
         Math.round((elapsedMinutes / estimatedMinutes) * 100),
         100
@@ -74,7 +79,7 @@ function FlightDashboard() {
     calculateProgress();
     const interval = setInterval(calculateProgress, 1000);
     return () => clearInterval(interval);
-  }, [startedAt, estimatedMinutes, isFlying, isPaused]);
+  }, [startedAt, estimatedMinutes, isFlying, isPaused, accumulatedMinutes]);
 
   if (!isFlying && !isPaused) return null;
 
@@ -82,7 +87,6 @@ function FlightDashboard() {
     <div className="fixed w-full max-w-5xl px-4 -translate-x-1/2 bottom-6 left-1/2">
       <div className="rounded-full shadow-2xl bg-slate-800">
         <div className="flex items-center gap-6 px-8 py-4">
-          {/* 제목 */}
           <div className="flex items-center max-w-md min-w-0 gap-4 shrink-0">
             <div className="min-w-0 text-left">
               <div className="text-sm font-medium tracking-wide text-blue-400">
@@ -95,7 +99,6 @@ function FlightDashboard() {
             <div className="w-px h-12 shrink-0 bg-slate-600"></div>
           </div>
 
-          {/* 프로그레스 */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-4 mb-2">
               <div className="text-left">
@@ -111,23 +114,25 @@ function FlightDashboard() {
               <div
                 className="absolute top-0 left-0 h-full transition-all duration-300 bg-blue-500 rounded-full"
                 style={{ width: `${progress}%` }}
-              ></div>
+              />
             </div>
           </div>
 
           <div className="w-px h-12 shrink-0 bg-slate-600"></div>
 
-          {/* 버튼 */}
           <div className="flex flex-row gap-3 shrink-0">
             <button
               onClick={isPaused ? handleResume : handlePause}
-              className="flex items-center gap-3 px-5 py-3 transition-colors border-2 rounded-full bg-red-950/50 border-red-500/50 hover:bg-red-900/50"
+              disabled={isActionLoading}
+              className={`flex items-center gap-3 px-5 py-3 transition-colors border-2 rounded-full bg-red-950/50 border-red-500/50 hover:bg-red-900/50 ${
+                isActionLoading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <div className="flex items-center justify-center w-6 h-6 bg-orange-400 rounded-sm">
                 <div className="w-3 h-3 bg-white rounded-sm"></div>
               </div>
               <span className="text-lg font-bold text-orange-400 whitespace-nowrap">
-                {isPaused ? "계속" : "정지"}
+                {isActionLoading ? "처리 중..." : isPaused ? "계속" : "정지"}
               </span>
             </button>
             <button

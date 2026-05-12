@@ -1,26 +1,24 @@
 "use client"
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 type SeatStatus = 'available' | 'occupied';
 type SeatsMap = Record<string, SeatStatus>;
 
 interface Props {
-  onStart : () => void;
-  onSeatSelect : (seat: string) => void;
-  flightName : string;
+  onStart: () => void;
+  onSeatSelect: (seat: string) => void;
+  flightName: string;
 }
 
 const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
   const rows = 12;
   const seatsPerRow = 6;
-  
-  // 초기 좌석 상태 생성 (available, selected, occupied)
-  const [seats, setSeats] = useState<SeatsMap>(() => {
+
+  const [seats] = useState<SeatsMap>(() => {
     const initialSeats: SeatsMap = {};
     for (let row = 1; row <= rows; row++) {
       for (let col = 0; col < seatsPerRow; col++) {
         const seatId = `${row}${String.fromCharCode(65 + col)}`;
-        // 랜덤하게 일부 좌석을 예약됨으로 설정
         initialSeats[seatId] = Math.random() > 0.7 ? 'occupied' : 'available';
       }
     }
@@ -29,38 +27,32 @@ const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
 
   const [selectedSeat, setSelectedSeat] = useState<string>("");
 
-  const handleSeatClick = (seatId: string) => {
+  // setSelectedSeat 중복 호출 제거
+  const handleSeatClick = useCallback((seatId: string) => {
     if (seats[seatId] === 'occupied') return;
-    
-    if (selectedSeat === seatId) {
-      setSelectedSeat("");
-    } else {
-      setSelectedSeat(seatId);
-    }
-    const nextSeat = selectedSeat === seatId ? "" : seatId;
-    onSeatSelect(nextSeat);
-    setSelectedSeat(nextSeat);
-  };
 
-  const getSeatColor = (seatId: string) => {
+    const nextSeat = selectedSeat === seatId ? "" : seatId;
+    setSelectedSeat(nextSeat);
+    onSeatSelect(nextSeat);
+  }, [seats, selectedSeat, onSeatSelect]);
+
+  // useCallback으로 감싸서 렌더마다 재생성 방지
+  const getSeatColor = useCallback((seatId: string) => {
     if (seats[seatId] === 'occupied') return 'bg-gray-600';
     if (selectedSeat === seatId) return 'bg-emerald-500';
     return 'bg-blue-500 hover:bg-blue-400';
-  };
+  }, [seats, selectedSeat]);
 
   return (
     <div className="flex items-center justify-center min-h-screen p-8 bg-black">
       <div className="w-full max-w-2xl">
-        {/* 비행기 앞부분 */}
         <div className="flex justify-center mb-8">
           <div className="w-64 h-16 border-t-4 border-gray-600 rounded-t-full bg-gradient-to-b from-gray-800 to-gray-700"></div>
         </div>
 
-        {/* 좌석 배치 */}
         <div className="p-8 bg-gray-900 shadow-2xl rounded-3xl">
           <h2 className="mb-6 text-2xl font-bold text-center text-white">좌석 선택</h2>
-          
-          {/* 좌석 범례 */}
+
           <div className="flex justify-center gap-6 mb-6 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-blue-500 rounded"></div>
@@ -76,13 +68,11 @@ const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
             </div>
           </div>
 
-          {/* 좌석 그리드 */}
           <div className="space-y-3">
             {Array.from({ length: rows }, (_, rowIndex) => {
               const rowNum = rowIndex + 1;
               return (
                 <div key={rowNum} className="flex items-center justify-center gap-2">
-                  {/* 왼쪽 좌석 (A, B, C) */}
                   <div className="flex gap-2">
                     {[0, 1, 2].map(colIndex => {
                       const seatId = `${rowNum}${String.fromCharCode(65 + colIndex)}`;
@@ -102,12 +92,10 @@ const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
                     })}
                   </div>
 
-                  {/* 통로 */}
                   <div className="flex items-center justify-center w-8">
                     <span className="font-bold text-gray-600">{rowNum}</span>
                   </div>
 
-                  {/* 오른쪽 좌석 (D, E, F) */}
                   <div className="flex gap-2">
                     {[3, 4, 5].map(colIndex => {
                       const seatId = `${rowNum}${String.fromCharCode(65 + colIndex)}`;
@@ -131,7 +119,6 @@ const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
             })}
           </div>
 
-          {/* 선택된 좌석 표시 */}
           {selectedSeat && (
             <div className="mt-8 text-center">
               <p className="text-lg text-white">
@@ -147,7 +134,6 @@ const SeatForm = ({ onStart, onSeatSelect, flightName }: Props) => {
           )}
         </div>
 
-        {/* 비행기 뒷부분 */}
         <div className="flex justify-center mt-8">
           <div className="w-48 h-12 border-b-4 border-gray-600 rounded-b-full bg-liner-to-b from-gray-700 to-gray-800"></div>
         </div>

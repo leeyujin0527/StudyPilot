@@ -3,6 +3,11 @@ import { persist } from 'zustand/middleware';
 import { stopSession } from '../api/stop-session';
 import { Checklist } from '../type/checklist-type';
 
+interface ResumeResult {
+  accumulatedMinutes: number;
+  resumedAt: string;
+}
+
 interface FlightStore {
   isFlying: boolean;
   isPaused: boolean;
@@ -13,12 +18,13 @@ interface FlightStore {
   sessionId: string | null;
   showFinishedModal: boolean;
   checklists: Checklist[];
+  accumulatedMinutes: number;
 
   setSession: (session: any) => void;
   flightEnd: () => void;
   flightNotEnd: () => void;
   setChecklists: (checklists: Checklist[]) => void;
-  flightResume: () => void;
+  flightResume: (res: ResumeResult) => void; // API 결과 받음
   flightPause: () => void;
 }
 
@@ -34,6 +40,7 @@ export const useFlightStore = create<FlightStore>()(
       sessionId: null,
       showFinishedModal: false,
       checklists: [],
+      accumulatedMinutes: 0,
 
       setSession: (session) => set({
         isFlying: true,
@@ -42,9 +49,9 @@ export const useFlightStore = create<FlightStore>()(
         startedAt: session.startedAt,
         estimatedMinutes: session.estimatedMinutes,
         sessionId: session.sessionId,
+        accumulatedMinutes: 0,
       }),
 
-      // ✅ 변경: finally로 묶어서 API 실패해도 무조건 초기화, 중복 set() 제거
       flightNotEnd: async () => {
         const { sessionId, checklists } = get();
         try {
@@ -58,16 +65,15 @@ export const useFlightStore = create<FlightStore>()(
             estimatedMinutes: null,
             showFinishedModal: false,
             checklists: [],
+            accumulatedMinutes: 0,
           });
         }
       },
 
-      // ✅ 변경: finally로 묶어서 API 실패해도 무조건 초기화
       flightEnd: async () => {
         const { sessionId, checklists } = get();
         try {
           if (sessionId) await stopSession(String(sessionId), checklists);
-          console.log(sessionId, "종료했습니다");
         } finally {
           set({
             isFlying: false,
@@ -77,23 +83,24 @@ export const useFlightStore = create<FlightStore>()(
             estimatedMinutes: null,
             showFinishedModal: true,
             checklists: [],
+            accumulatedMinutes: 0,
           });
         }
       },
 
-      setChecklists: (checklists: Checklist[]) => {
-        set({ checklists });
+      setChecklists: (checklists: Checklist[]) => set({ checklists }),
+
+      // store에서 API 호출 제거, 결과만 받아서 저장
+      flightResume: (res: ResumeResult) => {
+        set({
+          isFlying: true,
+          isPaused: false,
+          accumulatedMinutes: res.accumulatedMinutes,
+          startedAt: res.resumedAt,
+        });
       },
 
-      flightResume: async () => {
-        const { sessionId, isPaused } = get();
-        if (!sessionId || !isPaused) return;
-        set({ isFlying: true, isPaused: false });
-      },
-
-      flightPause: async () => {
-        const { sessionId, isPaused } = get();
-        if (!sessionId || isPaused) return;
+      flightPause: () => {
         set({ isFlying: true, isPaused: true });
       },
     }),
@@ -108,6 +115,7 @@ export const useFlightStore = create<FlightStore>()(
         estimatedMinutes: state.estimatedMinutes,
         sessionId: state.sessionId,
         checklists: state.checklists,
+        accumulatedMinutes: state.accumulatedMinutes,
       }),
     }
   )
